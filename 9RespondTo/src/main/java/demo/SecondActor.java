@@ -1,0 +1,36 @@
+package demo;
+
+import akka.actor.ActorRef;
+import akka.actor.Props;
+import akka.actor.UntypedAbstractActor;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
+
+public class SecondActor extends UntypedAbstractActor {
+	private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+	private Message m1 = new Message();
+
+	// Empty Constructor
+	public SecondActor() {}
+
+	// Static function that creates actor
+	public static Props createActor() {
+		return Props.create(SecondActor.class, () -> {
+			return new SecondActor();
+		});
+	}
+
+    @Override
+	public void onReceive(Object message) throws Throwable {
+		log.info("["+getSelf().path().name()+"] received message from ["+ getSender().path().name() +"]");
+        if(message instanceof Message){  
+            this.m1 = (Message) message;
+            log.info("["+getSelf().path().name()+"] received the request: {}", this.m1.getMsg());
+            
+            this.m1.getActorref().tell( this.m1, getSelf()); 
+		    log.info("["+getSelf().path().name()+"] sended request to: ["+ this.m1.getActorref().path().name() +"]");
+		}
+    }
+}
+
+
